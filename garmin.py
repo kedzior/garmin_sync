@@ -26,16 +26,19 @@ class GarminSync:
             device_info = DeviceInfo(device)
             mount_path = device_info.get_mount_path()
             if device_info.vendor == GarminSync.supported_devices[0][0] and\
-               device_info.model == GarminSync.supported_devices[0][1] and\
-               mount_path is not None:
-                files_to_upload = self.__scan_files(mount_path, last_date)
-                if files_to_upload == []:
-                    print('Up to date!')
+               device_info.model == GarminSync.supported_devices[0][1]:
+                if mount_path is not None:
+                    files_to_upload = self.__scan_files(mount_path, last_date)
+                    if files_to_upload == []:
+                        print('Up to date!')
+                    else:
+                        try:
+                            self.__upload_files(files_to_upload)
+                        except Exception:
+                            return
+                    self.__save_sync_file(current_time)
                 else:
-                    self.__upload_files(files_to_upload)
-                self.__save_sync_file(current_time)
-            else:
-                print('Please mount your Garmin device!')
+                    print('Please mount your Garmin device!')
                 return
         print('Garmin device not found!')
 
@@ -80,6 +83,7 @@ class GarminSync:
             print(str(len(files)) + ' files were sent!')
         else:
             print('Could not authenticate!')
+            raise Exception('Could not authenticate')
 
 
 if __name__ == '__main__':
