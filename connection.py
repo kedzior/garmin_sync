@@ -25,7 +25,7 @@ class Connection:
 
     def upload_activity(self, filename):
         files = {'file': (filename, open(filename, 'rb'))}
-        url = Connection.file_upload_url + '/fit'
+        url = Connection.file_upload + '/fit'
         resp = self.session.post(url, files=files, headers={'NK': 'NT'})
 
         if resp.status_code not in (200, 201, 409):
@@ -45,7 +45,7 @@ class Connection:
         username = input('Login: ')
         password = getpass.getpass('Password: ')
         data = {'embed': 'false', 'username': username, 'password': password}
-        resp = self.session.post(Connection.login_url,
+        resp = self.session.post(Connection.login,
                                  params=params,
                                  data=data)
         if resp.status_code != 200:
@@ -57,16 +57,15 @@ class Connection:
 
     def __phase_two(self, ticket):
         params = {'ticket': ticket}
-        self.session.get(Connection.main_url, params=params)
-        self.session.get(Connection.session_url)
+        self.session.get(Connection.main, params=params)
+        self.session.get(Connection.session)
 
     def __phase_three(self):
-        res = self.session.get(Connection.check_url)
+        res = self.session.get(Connection.check)
         self.__check_login(res)
 
     def __retrieve_ticket(self, resp):
-        regex = 'var response_url(\s+)= (\"|\').*?ticket=(?P<ticket>[\w\-]+)\
-                 (\"|\')'
+        regex = 'var response_url(\s+)= (\"|\').*?ticket=(?P<ticket>[\w\-]+)(\"|\')'
         ticket = re.search(regex, resp.text)
         if not ticket:
             raise Exception('Missing ticket')
